@@ -90,7 +90,6 @@ class DictFrame(wx.Frame):
         meanings = self.dict_trie.get_item(searchword)
         string_index = 0
         for data in meanings:
-            print data
             datadom = dom.parseString("<xml>" + data + "</xml>")
             results = get_all_text_formatting(datadom)
             results = [(x.strip(' '), y) for x,y in results if x.strip(' ')]
@@ -115,7 +114,6 @@ class DictFrame(wx.Frame):
                 self.resulttxt.AppendText(' ')
                 string_index += len(textstr) + 1
             self.delimiter = "\n\n\n\n\n"
-            print "done", self.delimiter
             self.resulttxt.SetScrollbar(0,0,50,100)
             self.resulttxt.AppendText(self.delimiter)
             string_index += len(self.delimiter)
