@@ -24,9 +24,8 @@ def get_all_text_formatting(dom):
         index = nodes_list.index(node)
         index += 1
         for item in node.childNodes:
-            nodes_list.insert(index, item)
+            nodes_list.insert(index, item)  #This will work :)
             index += 1
-        #nodes_list.extend(node.childNodes)
 
     return results
         
@@ -51,7 +50,6 @@ class DictFrame(wx.Frame):
         wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, wx.Size(450, 350))
         self.dict_trie = dict_trie
         self.CreateStatusBar()
-        self.SetStatusText("Loading")
         #self.SetIcon(wx.Icon('resources/images/chippy.jpg', wx.BITMAP_TYPE_JPEG))
         self.SetIcon(wx.Icon('resources/images/dict.ico', wx.BITMAP_TYPE_ICO))
         self.getMenus()
@@ -67,12 +65,7 @@ class DictFrame(wx.Frame):
         searchpanel.SetSizer(hbox1)
         resultspanel = wx.Panel(self, -1, style=wx.SUNKEN_BORDER)
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        #self.resulttxt = expando.ExpandoTextCtrl(resultspanel, DictFrame.RESULTS_BOX_ID, style=wx.TE_AUTO_SCROLL | wx.TE_MULTILINE| wx.TE_RICH2 | wx.TE_BESTWRAP) 
         self.resulttxt = wx.TextCtrl(resultspanel, DictFrame.RESULTS_BOX_ID, style=wx.TE_AUTO_SCROLL | wx.TE_MULTILINE| wx.TE_RICH2 | wx.TE_BESTWRAP | wx.TE_READONLY) 
-        #self.resulttxt.SetEditable(False)
-        #self.resulttxt.SetScrollbar(int orientation, int position, int thumbSize, int range)
-        #self.resulttxt.SetScrollbar(0, 11, 15, 11)
-        #wx.StaticText(resultspanel, DictFrame.RESULTS_BOX_ID, 'Results Pane')
         hbox2.Add(self.resulttxt, 1, wx.EXPAND | wx.ALL, 4)
         resultspanel.SetSizer(hbox2)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -85,15 +78,15 @@ class DictFrame(wx.Frame):
 
 
     def OnSearch(self, event):
+        self.SetStatusText("Loading")
         searchword = self.searchtxt.GetValue()
         self.resulttxt.Clear()
         meanings = self.dict_trie.get_item(searchword)
         string_index = 0
         for data in meanings:
-            datadom = dom.parseString("<xml>" + data + "</xml>")
+            datadom = dom.parseString('<xml>' + data + "</xml>")
             results = get_all_text_formatting(datadom)
             results = [(x.strip(' '), y) for x,y in results if x.strip(' ')]
-            strings = []
             for index, textinfo in enumerate(results):
                 textstr, textattr = textinfo
                 self.resulttxt.AppendText(textstr)
@@ -114,9 +107,15 @@ class DictFrame(wx.Frame):
                 self.resulttxt.AppendText(' ')
                 string_index += len(textstr) + 1
             self.delimiter = "\n\n\n\n\n"
-            self.resulttxt.SetScrollbar(0,0,50,100)
             self.resulttxt.AppendText(self.delimiter)
             string_index += len(self.delimiter)
+        flag = True
+        if string_index:
+            while flag:
+                flag = self.resulttxt.ScrollPages(-1)
+        self.SetStatusText("")
+        self.resulttxt.Refresh()
+        self.resulttxt.SetScrollPos( wx.VERTICAL, self.resulttxt.GetScrollRange( wx.VERTICAL) )
         
         
 
@@ -130,7 +129,7 @@ class DictFrame(wx.Frame):
         edit.Append(DictFrame.FIND_ID, "&Find\tCtrl+F", "Find ...")
         options = wx.Menu()
         history = wx.MenuItem(options, DictFrame.REMEMBER_HISTORY_ID, "&Remember History", "Remembers Last 100 searches", wx.ITEM_CHECK)
-        history.SetBitmap(wx.Image("resources/images/history.ico", wx.BITMAP_TYPE_ICO).ConvertToBitmap())
+        #history.SetBitmap(wx.Image("resources/images/history.ico", wx.BITMAP_TYPE_ICO).ConvertToBitmap())
         options.AppendItem(history)
         options.Append(DictFrame.CLEAR_HISTORY_ID, "C&lear History")
         encoding_submenu = wx.Menu()
@@ -144,17 +143,6 @@ class DictFrame(wx.Frame):
         menubar.Append(options, "&Options")
         self.SetMenuBar(menubar)
         self.Center()
-        #EVT_MENU(self, ABOUT_ID, self.OnAbout)
-        #EVT_MENU(self, PREV_ID, self.prev)
-
-
-    def OnAbout(self, event):
-        dlg = wx.MessageDialog(self, "This sample program shows off\n"
-                              "frames, menus, statusbars, and this\n"
-                              "message dialog.",
-                              "About Me", wx.OK | wx.ICON_INFORMATION)
-        dlg.ShowModal()
-        dlg.Destroy()
 
 
     def prev(self, event):
@@ -178,16 +166,6 @@ class DictionaryApp(wx.App):
 if __name__ == "__main__":
     dict_trie = trie.Trie()
     time1 = time.time()
-    #dict_trie.unpickle_me('pickled_data')
     dict_trie.unpickle_me('trie.data')
     dictionaryApp = DictionaryApp(redirect=0, dict_trie=dict_trie)
     dictionaryApp.MainLoop()
-    """
-    while 1:
-        term = raw_input()
-        if term == 'end': break
-        st_time = time.time()
-        result = me.get_item(term)
-        print "time for retrieval", time.time() - st_time
-        print result
-    """
