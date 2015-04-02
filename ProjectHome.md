@@ -1,0 +1,1 @@
+Dictionary implemented using python and wxwidgets using merriam webster data that is opensource
